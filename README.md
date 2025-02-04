@@ -20,7 +20,9 @@ pnpm pnpm start --character="characters/joe.character.json"
 
 This project integrates the plugin-evm and is configured for Arbitrum Sepolia, allowing you to perform token transfers, swaps, and bridging. For example, if you want to send Ether to another account, you can write:
 
-`Transfer 0.0000000001 ETH to 0x1F0c72E13718D9136FfE51b89289b239A1BcfE28 on Arbitrum Sepolia`
+```bash
+Transfer 0.0000000001 ETH to 0x1F0c72E13718D9136FfE51b89289b239A1BcfE28 on Arbitrum Sepolia
+```
 
 Check the README of the plugin-evm for more details about the configuration and instructions on how to call the actions.
 
