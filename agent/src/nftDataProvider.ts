@@ -6,37 +6,31 @@ import {
     elizaLogger,
 } from "@elizaos/core";
 
-import { isDataComplete, UserData } from "./userDataEvaluator.ts";
+import { emptyNftData, isDataComplete, NftData } from "./nftDataEvaluator.ts";
 
 // Field-specific guidance
 const FIELD_GUIDANCE = {
     name: {
-        description: "User's full name",
-        valid: "John Smith, Maria Garcia",
-        invalid: "nicknames, usernames, other people's names, or partial names",
-        instructions: "Extract only when user directly states their own name",
+        description: "NFT name",
+        valid: "Maserati GranTurismo, Samsung Galaxy S25, Adidas Campus",
+        invalid: "future plans, past possessions, or aspirational items",
+        instructions: "Extract only when user directly states the NFT's name",
     },
-    location: {
-        description: "Current place of residence",
-        valid: "Seattle WA, London UK, Toronto",
-        invalid: "places visited, previous homes, or future plans",
+    description: {
+        description: "NFT description",
+        valid: "A gret car, a smartphone, a pair of shoes",
+        invalid: "future plans, past possessions, or aspirational items",
         instructions:
-            "Extract only current residence location, not temporary or planned locations",
+            "Extract only when user directly states the NFT's description",
     },
-    occupation: {
-        description: "Current profession or job",
-        valid: "software engineer, teacher, nurse, business owner",
-        invalid: "past jobs, aspirational roles, or hobbies",
-        instructions: "Extract only current primary occupation or profession",
+    recipient: {
+        description: "NFT recipient's Ethereum address for the NFT",
+        valid: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e, 0x66f820a414680B5bcda5eECA5dea238543F42054, vitalik.eth, wevm.eth",
+        invalid:
+            "email addresses, phone numbers, home addresses, or other types of addresses",
+        instructions:
+            "Extract only when user directly states the NFT's recipient",
     },
-};
-
-// Initialize empty user data
-const emptyUserData: UserData = {
-    name: undefined,
-    location: undefined,
-    occupation: undefined,
-    lastUpdated: undefined,
 };
 
 // Helper functions
@@ -45,18 +39,18 @@ const getCacheKey = (runtime: IAgentRuntime, userId: string): string => {
 };
 
 const getMissingFields = (
-    data: UserData
-): Array<keyof Omit<UserData, "lastUpdated">> => {
-    const fields: Array<keyof Omit<UserData, "lastUpdated">> = [
+    data: NftData
+): Array<keyof Omit<NftData, "lastUpdated">> => {
+    const fields: Array<keyof Omit<NftData, "lastUpdated">> = [
         "name",
-        "location",
-        "occupation",
+        "description",
+        "recipient",
     ];
     return fields.filter((field) => !data[field]);
 };
 
 // Provider Implementation
-export const userDataProvider: Provider = {
+export const nftDataProvider: Provider = {
     get: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -64,11 +58,11 @@ export const userDataProvider: Provider = {
     ): Promise<string> => {
         try {
             const cacheKey = getCacheKey(runtime, message.userId);
-            const cachedData = (await runtime.cacheManager.get<UserData>(
+            const cachedData = (await runtime.cacheManager.get<NftData>(
                 cacheKey
-            )) || { ...emptyUserData };
+            )) || { ...emptyNftData };
 
-            let response = "User Information Status:\n\n";
+            let response = "NFT Information Status:\n\n";
 
             // Known Information
             const knownFields = Object.entries(cachedData)
@@ -124,18 +118,24 @@ export const userDataProvider: Provider = {
 
             return response;
         } catch (error) {
-            elizaLogger.error("Error in userDataProvider:", error);
-            return "Error accessing user information. Continuing conversation normally.";
+            elizaLogger.error("Error in nftDataProvider:", error);
+            return "Error accessing NFT information. Continuing conversation normally.";
         }
     },
 };
 
 // Add new completion signal provider
-export const userDataCompletionProvider: Provider = {
-    get: async (runtime: IAgentRuntime, message: Memory, state?: State): Promise<string> => {
+/* export const userDataCompletionProvider: Provider = {
+    get: async (
+        runtime: IAgentRuntime,
+        message: Memory,
+        state?: State
+    ): Promise<string> => {
         try {
             const cacheKey = getCacheKey(runtime, message.userId);
-            const cachedData = await runtime.cacheManager.get<UserData>(cacheKey) || { ...emptyUserData };
+            const cachedData = (await runtime.cacheManager.get<NftData>(
+                cacheKey
+            )) || { ...emptyUserData };
 
             // Only return the code if all data is complete
             if (isDataComplete(cachedData)) {
@@ -145,8 +145,9 @@ export const userDataCompletionProvider: Provider = {
             // Return empty string if data collection is incomplete
             return "";
         } catch (error) {
-            elizaLogger.error('Error in userDataCompletionProvider:', error);
+            elizaLogger.error("Error in userDataCompletionProvider:", error);
             return "";
         }
-    }
+    },
 };
+ */

@@ -7,19 +7,17 @@ import {
     generateObjectDeprecated,
 } from "@elizaos/core";
 
-// Define strict types for user data
-export interface UserData {
+export interface NftData {
     name: string | undefined;
-    location: string | undefined;
-    occupation: string | undefined;
+    description: string | undefined;
+    recipient: string | undefined;
     lastUpdated: number | undefined;
 }
 
-// Initialize empty user data
-export const emptyUserData: UserData = {
+export const emptyNftData: NftData = {
     name: undefined,
-    location: undefined,
-    occupation: undefined,
+    description: undefined,
+    recipient: undefined,
     lastUpdated: undefined,
 };
 
@@ -29,31 +27,31 @@ const getCacheKey = (runtime: IAgentRuntime, userId: string): string => {
 };
 
 const getMissingFields = (
-    data: UserData
-): Array<keyof Omit<UserData, "lastUpdated">> => {
-    const fields: Array<keyof Omit<UserData, "lastUpdated">> = [
+    data: NftData
+): Array<keyof Omit<NftData, "lastUpdated">> => {
+    const fields: Array<keyof Omit<NftData, "lastUpdated">> = [
         "name",
-        "location",
-        "occupation",
+        "description",
+        "recipient",
     ];
     return fields.filter((field) => !data[field]);
 };
 
-export const isDataComplete = (data: UserData): boolean => {
+export const isDataComplete = (data: NftData): boolean => {
     return getMissingFields(data).length === 0;
 };
 
 // Evaluator Implementation
-export const userDataEvaluator: Evaluator = {
-    name: "GET_USER_DATA",
+export const nftDataEvaluator: Evaluator = {
+    name: "GET_NFT_DATA",
     similes: [
-        "EXTRACT_USER_INFO",
-        "GET_USER_INFORMATION",
-        "COLLECT_USER_DATA",
-        "USER_DETAILS",
+        "EXTRACT_NFT_INFO",
+        "GET_NFT_INFORMATION",
+        "COLLECT_NFT_DATA",
+        "NFT_DETAILS",
     ],
     description:
-        "Extract user's name, location, and occupation from conversation when clearly stated.",
+        "Extract the NFT's name, description, and recipient (an Ethereum address) from the conversation when explicitly mentioned.",
     alwaysRun: true,
 
     validate: async (
@@ -62,12 +60,12 @@ export const userDataEvaluator: Evaluator = {
     ): Promise<boolean> => {
         try {
             const cacheKey = getCacheKey(runtime, message.userId);
-            const cachedData = (await runtime.cacheManager.get<UserData>(
+            const cachedData = (await runtime.cacheManager.get<NftData>(
                 cacheKey
-            )) || { ...emptyUserData };
+            )) || { ...emptyNftData };
             return !isDataComplete(cachedData);
         } catch (error) {
-            elizaLogger.error("Error in userDataEvaluator validate:", error);
+            elizaLogger.error("Error in nftDataEvaluator validate:", error);
             return false;
         }
     },
@@ -75,12 +73,12 @@ export const userDataEvaluator: Evaluator = {
     handler: async (runtime: IAgentRuntime, message: Memory): Promise<void> => {
         try {
             const cacheKey = getCacheKey(runtime, message.userId);
-            const cachedData = (await runtime.cacheManager.get<UserData>(
+            const cachedData = (await runtime.cacheManager.get<NftData>(
                 cacheKey
-            )) || { ...emptyUserData };
+            )) || { ...emptyNftData };
 
             const extractionTemplate = `
-		Analyze the following conversation to extract personal information.
+		Analyze the following conversation to extract NFT information.
 		Only extract information when it is explicitly and clearly stated by the user about themselves.
 
 		Conversation:
@@ -88,9 +86,9 @@ export const userDataEvaluator: Evaluator = {
 
 		Return a JSON object containing only the fields where information was clearly found:
 		{
-			"name": "extracted full name if stated",
-			"location": "extracted current residence if stated",
-			"occupation": "extracted current occupation if stated"
+			"name": "extracted NFT's name if stated",
+                    "description": "extracted NFT's description if stated",
+                    "recipient": "extracted Ethereum address of the NFT's recipient if stated"
 		}
 
 		Only include fields where information is explicitly stated and current.
@@ -106,7 +104,7 @@ export const userDataEvaluator: Evaluator = {
             let dataUpdated = false;
 
             // Update only undefined fields with new information
-            for (const field of ["name", "location", "occupation"] as const) {
+            for (const field of ["name", "description", "recipient"] as const) {
                 if (extractedInfo[field] && cachedData[field] === undefined) {
                     cachedData[field] = extractedInfo[field];
                     dataUpdated = true;
@@ -116,58 +114,63 @@ export const userDataEvaluator: Evaluator = {
             if (dataUpdated) {
                 cachedData.lastUpdated = Date.now();
                 await runtime.cacheManager.set(cacheKey, cachedData, {
-                    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1 week cache
+                    expires: Date.now() + 10 * 60 * 1000, // 10 minutes cache
                 });
             }
 
             if (isDataComplete(cachedData)) {
                 elizaLogger.success(
-                    "User data collection completed:",
+                    "Label data collection completed:",
                     cachedData
                 );
                 // DO SOME API CALL OUT TO SOMETHING ELSE HERE!!!!
             }
         } catch (error) {
-            elizaLogger.error("Error in userDataEvaluator handler:", error);
+            elizaLogger.error("Error in nftDataEvaluator handler:", error);
         }
     },
 
     examples: [
         {
-            context: "Initial user introduction",
+            context: "NFT creation",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "Hi everyone! I'm David Chen, working as a dentist here in Chicago.",
+                        text: `Hi everyone! I want to create a new NFT called Maserati GranTurismo
+                                with this description: A luxurious grand tourer powered by a high-revving V8 engine, combining Italian elegance with dynamic performance.
+                                It offers an exhilarating driving experience, refined craftsmanship, and timeless design.
+                                I want the NFT to be sent to the address 0x20c6F9006d563240031A1388f4f25726029a6368`,
                     },
                 },
             ],
             outcome: `[{
-            "name": "David Chen",
-            "location": "Chicago",
-            "occupation": "dentist"
-    }]`,
+                "name": "Maserati GranTurismo",
+                "description": "A luxurious grand tourer powered by a high-revving V8 engine, combining Italian elegance with dynamic performance.
+                                It offers an exhilarating driving experience, refined craftsmanship, and timeless design.",
+                "recipient": "0x20c6F9006d563240031A1388f4f25726029a6368"
+            }]`,
         },
         {
-            context: "Travel discussion",
+            context: "Purchase discussion",
             messages: [
                 {
                     user: "{{user1}}",
                     content: {
-                        text: "I might move to Barcelona next year, it's such a beautiful city.",
+                        text: "I plan to buy a new Maserati GranTurismo next year.",
                     },
                 },
             ],
             outcome: "{}",
         },
         {
-            // Information about others
-            context: "Family discussion",
+            context: "NFT portfolio discussion",
             messages: [
                 {
                     user: "{{user1}}",
-                    content: { text: "My brother Tom is a lawyer in New York" },
+                    content: {
+                        text: "I already own many NFTs in my wallet 0x20c6F9006d563240031A1388f4f25726029a6368",
+                    },
                 },
             ],
             outcome: "{}",
