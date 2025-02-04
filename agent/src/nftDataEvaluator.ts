@@ -6,6 +6,8 @@ import {
     elizaLogger,
     generateObjectDeprecated,
 } from "@elizaos/core";
+import { uploadJson } from "./pinata";
+import { mintNft } from "./viem";
 
 export interface NftData {
     name: string | undefined;
@@ -21,7 +23,16 @@ export const emptyNftData: NftData = {
     lastUpdated: undefined,
 };
 
-// Helper functions
+export interface MintTxData {
+    txHash: string | undefined;
+    lastUpdated: number | undefined;
+}
+
+export const emptyMintTx: MintTxData = {
+    txHash: undefined,
+    lastUpdated: undefined,
+};
+
 const getCacheKey = (runtime: IAgentRuntime, userId: string): string => {
     return `${runtime.character.name}/${userId}/data`;
 };
@@ -41,7 +52,6 @@ export const isDataComplete = (data: NftData): boolean => {
     return getMissingFields(data).length === 0;
 };
 
-// Evaluator Implementation
 export const nftDataEvaluator: Evaluator = {
     name: "GET_NFT_DATA",
     similes: [
@@ -77,23 +87,27 @@ export const nftDataEvaluator: Evaluator = {
                 cacheKey
             )) || { ...emptyNftData };
 
+            const cachedMintTx = (await runtime.cacheManager.get<MintTxData>(
+                cacheKey
+            )) || { ...emptyMintTx };
+
             const extractionTemplate = `
-		Analyze the following conversation to extract NFT information.
-		Only extract information when it is explicitly and clearly stated by the user about themselves.
+                Analyze the following conversation to extract NFT information.
+                Only extract information when it is explicitly and clearly stated by the user about themselves.
 
-		Conversation:
-		${message.content.text}
+                Conversation:
+                ${message.content.text}
 
-		Return a JSON object containing only the fields where information was clearly found:
-		{
-			"name": "extracted NFT's name if stated",
-                    "description": "extracted NFT's description if stated",
-                    "recipient": "extracted Ethereum address of the NFT's recipient if stated"
-		}
+                Return a JSON object containing only the fields where information was clearly found:
+                {
+                    "name": "extracted NFT's name if stated",
+                            "description": "extracted NFT's description if stated",
+                            "recipient": "extracted Ethereum address of the NFT's recipient if stated"
+                }
 
-		Only include fields where information is explicitly stated and current.
-		Omit fields if information is unclear, hypothetical, or about others.
-		`;
+                Only include fields where information is explicitly stated and current.
+                Omit fields if information is unclear, hypothetical, or about others.
+                `;
 
             const extractedInfo = await generateObjectDeprecated({
                 runtime,
@@ -103,7 +117,6 @@ export const nftDataEvaluator: Evaluator = {
 
             let dataUpdated = false;
 
-            // Update only undefined fields with new information
             for (const field of ["name", "description", "recipient"] as const) {
                 if (extractedInfo[field] && cachedData[field] === undefined) {
                     cachedData[field] = extractedInfo[field];
@@ -120,10 +133,30 @@ export const nftDataEvaluator: Evaluator = {
 
             if (isDataComplete(cachedData)) {
                 elizaLogger.success(
-                    "Label data collection completed:",
+                    "NFT data collection completed:",
                     cachedData
                 );
-                // DO SOME API CALL OUT TO SOMETHING ELSE HERE!!!!
+
+                const dataIpfsHash = await uploadJson(
+                    cachedData.name,
+                    cachedData.description
+                );
+                elizaLogger.success(
+                    `Uploaded JSON to IPFS with hash: ${dataIpfsHash}`
+                );
+                const dataIpfsUrl = `ipfs://${dataIpfsHash}`;
+                const mintTxHash = await mintNft(
+                    cachedData.recipient,
+                    dataIpfsUrl
+                );
+                elizaLogger.success(
+                    `Minted NFT with transaction hash: ${mintTxHash}`
+                );
+                cachedMintTx.lastUpdated = Date.now();
+                cachedMintTx.txHash = mintTxHash;
+                await runtime.cacheManager.set(cacheKey, cachedMintTx, {
+                    expires: Date.now() + 10 * 60 * 1000, // 10 minutes cache
+                });
             }
         } catch (error) {
             elizaLogger.error("Error in nftDataEvaluator handler:", error);

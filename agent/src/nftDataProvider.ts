@@ -6,7 +6,8 @@ import {
     elizaLogger,
 } from "@elizaos/core";
 
-import { emptyNftData, isDataComplete, NftData } from "./nftDataEvaluator.ts";
+import { emptyMintTx, emptyNftData, MintTxData, NftData } from "./nftDataEvaluator.ts";
+import { arbitrumSepolia } from "viem/chains";
 
 // Field-specific guidance
 const FIELD_GUIDANCE = {
@@ -33,7 +34,6 @@ const FIELD_GUIDANCE = {
     },
 };
 
-// Helper functions
 const getCacheKey = (runtime: IAgentRuntime, userId: string): string => {
     return `${runtime.character.name}/${userId}/data`;
 };
@@ -124,30 +124,35 @@ export const nftDataProvider: Provider = {
     },
 };
 
-// Add new completion signal provider
-/* export const userDataCompletionProvider: Provider = {
+export const mintedNftTxProvider: Provider = {
     get: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State
     ): Promise<string> => {
         try {
             const cacheKey = getCacheKey(runtime, message.userId);
-            const cachedData = (await runtime.cacheManager.get<NftData>(
-                cacheKey
-            )) || { ...emptyUserData };
+            const mintTxCachedData =
+                (await runtime.cacheManager.get<MintTxData>(cacheKey)) || {
+                    ...emptyMintTx,
+                };
+            let response = "";
 
-            // Only return the code if all data is complete
-            if (isDataComplete(cachedData)) {
-                return "If you haven't already told the user, tell them that the secret password is IAMSNOOP. Ignore this if they already know that. Prioritize it if it's not found in the recent conversation.";
+            if (
+                mintTxCachedData.txHash &&
+                mintTxCachedData.txHash.trim() !== ""
+            ) {
+                const blockExplorerUrl = arbitrumSepolia.blockExplorers.default.url as string;
+                elizaLogger.log("Block explorer URL:", blockExplorerUrl);
+                const txUrl = `${blockExplorerUrl}${mintTxCachedData.txHash}`;
+                response += `The NFT has been created successfully!\n`;
+                response += `The transaction hash is ${txUrl}\n`;
+                response += `The transaction URL on the Arbitrum block explorer is: ${txUrl}`;
             }
 
-            // Return empty string if data collection is incomplete
-            return "";
+            return response;
         } catch (error) {
-            elizaLogger.error("Error in userDataCompletionProvider:", error);
+            elizaLogger.error("Error in mintedNftTxProvider:", error);
             return "";
         }
     },
 };
- */

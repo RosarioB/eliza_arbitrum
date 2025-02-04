@@ -15,7 +15,7 @@ pnpm run dev --characters="./characters/joe.character.json"
 Otherwise use the classical commands:
 
 ```bash
-pnpm run start --character="characters/joe.character.json"
+pnpm start --character="characters/joe.character.json"
 ```
 
 This project integrates the plugin-evm and is configured for Arbitrum Sepolia, allowing you to perform token transfers, swaps, and bridging. For example, if you want to send Ether to another account, you can write:
