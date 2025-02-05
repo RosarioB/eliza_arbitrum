@@ -4,6 +4,7 @@ export * from "./actions.ts";
 export * from "./context.ts";
 export * from "./database.ts";
 export * from "./defaultCharacter.ts";
+export * from "./joeCharacter.ts";
 export * from "./embedding.ts";
 export * from "./evaluators.ts";
 export * from "./generation.ts";

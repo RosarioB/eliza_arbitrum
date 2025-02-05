@@ -13,7 +13,7 @@ import {
     Character,
     Clients,
     DbCacheAdapter,
-    defaultCharacter,
+    joeCharacter,
     elizaLogger,
     FsCacheAdapter,
     IAgentRuntime,
@@ -204,7 +204,7 @@ export async function loadCharacters(
 
     if (loadedCharacters.length === 0) {
         elizaLogger.info("No characters found, using default character");
-        loadedCharacters.push(defaultCharacter);
+        loadedCharacters.push(joeCharacter);
     }
 
     return loadedCharacters;
@@ -640,7 +640,7 @@ const startAgents = async () => {
     let serverPort = parseInt(settings.SERVER_PORT || "3000");
     const args = parseArguments();
     let charactersArg = args.characters || args.character;
-    let characters = [defaultCharacter];
+    let characters = [joeCharacter];
 
     if (charactersArg) {
         characters = await loadCharacters(charactersArg);
