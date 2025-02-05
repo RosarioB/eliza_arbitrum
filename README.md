@@ -4,7 +4,7 @@ This project is an AI agent based on Eliza that mints NFTs after collecting info
 In the project root add these variables to the .env file:
 Set the following environment variables
 ```bash
-ANTHROPIC_API_KEY=your-anthropic-api-key-here
+OPENAI_API_KEY=your-openai-api-key-here
 EVM_PRIVATE_KEY=your-private-key-here
 ETHEREUM_PROVIDER_ARBITRUMSEPOLIA=https://your-custom-rpc-url
 PINATA_JWT=your-pinata-jwt-here

@@ -1,7 +1,7 @@
 {
     "name": "Joe",
     "clients": [],
-    "modelProvider": "anthropic",
+    "modelProvider": "openai",
     "settings": {
         "voice": {
             "model": "en_US-male-medium"
