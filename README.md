@@ -1,10 +1,14 @@
 # eliza_arbitrum
+This project is an AI agent based on Eliza that mints NFTs after collecting information from the user. In the stylus folder, you can find the smart contract that has been created and deployed on Arbitrum, which the agent interacts with to mint the NFTs. The NFTs' metadata is stored on IPFS using Pinata.
 
+In the project root add these variables to the .env file:
 Set the following environment variables
 ```bash
 ANTHROPIC_API_KEY=your-anthropic-api-key-here
 EVM_PRIVATE_KEY=your-private-key-here
 ETHEREUM_PROVIDER_ARBITRUMSEPOLIA=https://your-custom-rpc-url
+PINATA_JWT=your-pinata-jwt-here
+PINATA_GATEWAY_URL=your-pinata-gateway-url-here
 ```
 Run `pnpm i && pnpm build` to install the dependencies
 
@@ -18,7 +22,7 @@ Otherwise use the classical commands:
 pnpm start --character="characters/joe.character.json"
 ```
 
-This project integrates the plugin-evm and is configured for Arbitrum Sepolia, allowing you to perform token transfers, swaps, and bridging. For example, if you want to send Ether to another account, you can write:
+This project also integrates the plugin-evm and is configured for Arbitrum Sepolia, allowing you to perform token transfers, swaps, and bridging. For example, if you want to send Ether to another account, you can write:
 
 ```bash
 Transfer 0.0000000001 ETH to 0x1F0c72E13718D9136FfE51b89289b239A1BcfE28 on Arbitrum Sepolia
@@ -176,4 +180,3 @@ pnpm install --include=optional sharp
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=elizaos/eliza&type=Date)](https://star-history.com/#elizaos/eliza&Date)
-# eliza_devschool
