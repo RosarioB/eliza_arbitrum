@@ -40,7 +40,7 @@ import { fileURLToPath } from "url";
 import yargs from "yargs";
 import net from "net";
 
-import { nftDataProvider } from "./nftDataProvider";
+import { mintedNftTxProvider, nftDataProvider } from "./nftDataProvider";
 import { nftDataEvaluator } from "./nftDataEvaluator";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -496,7 +496,7 @@ export async function createAgent(
         character,
         // character.plugins are handled when clients are added
         plugins: [bootstrapPlugin, nodePlugin, evmPlugin].filter(Boolean),
-        providers: [nftDataProvider/*,  userDataCompletionProvider */],
+        providers: [nftDataProvider, mintedNftTxProvider],
         actions: [],
         services: [],
         managers: [],

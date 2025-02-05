@@ -5,6 +5,7 @@ In the project root add these variables to the .env file:
 Set the following environment variables
 ```bash
 OPENAI_API_KEY=your-openai-api-key-here
+ANTHROPIC_API_KEY=your-anthropic-api-key
 EVM_PRIVATE_KEY=your-private-key-here
 ETHEREUM_PROVIDER_ARBITRUMSEPOLIA=https://your-custom-rpc-url
 PINATA_JWT=your-pinata-jwt-here

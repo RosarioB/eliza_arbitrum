@@ -143,7 +143,7 @@ export const mintedNftTxProvider: Provider = {
             ) {
                 const blockExplorerUrl = arbitrumSepolia.blockExplorers.default.url as string;
                 elizaLogger.log("Block explorer URL:", blockExplorerUrl);
-                const txUrl = `${blockExplorerUrl}${mintTxCachedData.txHash}`;
+                const txUrl = `${blockExplorerUrl}/tx/${mintTxCachedData.txHash}`;
                 response += `The NFT has been created successfully!\n`;
                 response += `The transaction hash is ${txUrl}\n`;
                 response += `The transaction URL on the Arbitrum block explorer is: ${txUrl}`;
