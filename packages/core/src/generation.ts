@@ -191,7 +191,7 @@ export async function generateText({
         return "";
     }
     // LOG THE CONTEXT
-    console.log("The context is: ", context);
+    //console.log("The context is: ", context);
 
     elizaLogger.log("Generating text...");
 
