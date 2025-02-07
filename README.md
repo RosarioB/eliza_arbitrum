@@ -3,8 +3,8 @@ This project is an AI agent based on Eliza that mints NFTs after collecting info
 
 In the project root add these variables to the .env file:
 Set the following environment variables
+
 ```bash
-OPENAI_API_KEY=your-openai-api-key-here
 ANTHROPIC_API_KEY=your-anthropic-api-key
 EVM_PRIVATE_KEY=your-private-key-here
 ETHEREUM_PROVIDER_ARBITRUMSEPOLIA=https://your-custom-rpc-url
@@ -13,15 +13,26 @@ PINATA_GATEWAY_URL=your-pinata-gateway-url-here
 ```
 Run `pnpm i && pnpm build` to install the dependencies
 
-To run the application ind evelopment mode, including the build execute:
+The following command starts the agent in development mode (including the build and also run the Vite client to chat with the agent):
 ```bash
-pnpm run dev --characters="./characters/joe.character.json"
+pnpm run dev
 ```
-Otherwise use the classical commands:
+Otherwise just start the agent:
 
 ```bash
-pnpm start --character="characters/joe.character.json"
+pnpm start
 ```
+
+In this second case you must run the Vite client to chat with the agent by executing `pnpm start:client`
+
+To test the agent you can say something like:
+
+```
+I want to create a new NFT called Audi R8 V10 Plus with this description: A high-performance supercar powered by a naturally aspirated V10 engine, blending German engineering with cutting-edge technology. It offers razor-sharp handling, a sophisticated design, and an exhilarating driving experience.
+I want the label to be sent to the address 0x20c6F9006d563240031A1388f4f25726029a6368
+```
+
+It will mint a new NFT on Arbitrum Sepolia with the name and description provided, which will be stored on IPFS.
 
 This project also integrates the plugin-evm and is configured for Arbitrum Sepolia, allowing you to perform token transfers, swaps, and bridging. For example, if you want to send Ether to another account, you can write:
 
