@@ -1,6 +1,8 @@
 # eliza_arbitrum
 This project is an AI agent based on Eliza that mints NFTs after collecting information from the user. In the stylus folder, you can find the smart contract that has been created and deployed on Arbitrum, which the agent interacts with to mint the NFTs. The NFTs' metadata is stored on IPFS using Pinata.
 
+The demo of this project can be found on [Youtube](https://www.youtube.com/watch?v=wbFC_NQM0pY)
+
 In the project root add these variables to the .env file:
 Set the following environment variables
 
